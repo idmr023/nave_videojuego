@@ -145,8 +145,8 @@ var Juego = {
 
     controlarNave: function (comando) {
         const movimientos = {
-            'izquierda': -1,
-            'derecha': 1
+            'izquierda.': -1,
+            'derecha.': 1
         };
 
         if (movimientos[comando]) {
