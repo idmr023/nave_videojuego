@@ -1,4 +1,51 @@
 // Variables globales para gestionar los elementos principales del juego.
+var nave;
+var asteroides;
+var timer;
+var asteroidesEsquivados = 0;
+var nivel = 1;
+var velocidadAsteroides = 100;
+var textoNivel;
+var reconocimientoVoz; 
+var nombreCreador = "Ivan Daniel Manrique Roa";
+var movimientoEnCurso = 0; // Estado de movimiento: 0 = detenido, 1 = izquierda, 2 = derecha.
+
+// Menú principal del juego.
+var Menu = {
+    preload: function () {
+        // Carga los recursos necesarios para el menú (fondo y botón).
+        juego.load.image('fondo', 'img/bg.png');
+        juego.load.image('boton', 'img/boton.png');
+    },
+
+    create: function () {
+        // Configura el fondo y ajusta su tamaño al de la pantalla.
+        var fondo = juego.add.sprite(0, 0, 'fondo');
+        fondo.width = juego.width;
+        fondo.height = juego.height;
+
+        // Añade el título del juego centrado en la pantalla.
+        var titulo = juego.add.text(juego.width / 2, juego.height / 3, 'Juego de Asteroides', {
+            font: '40px Arial',
+            fill: '#ffffff'
+        });
+        titulo.anchor.setTo(0.5);
+
+        // Crea un botón para iniciar el juego.
+        var botonIniciar = juego.add.button(juego.width / 2, juego.height / 1.5, 'boton', function () {
+            juego.state.start('Juego'); // Cambia al estado "Juego".
+        });
+        botonIniciar.anchor.setTo(0.5);
+
+        // Añade un texto con el nombre del creador.
+        juego.add.text(juego.width / 2, juego.height / 2.6, 'Creador: ' + nombreCreador, {
+            font: '20px Arial',
+            fill: '#ffffff'
+        }).anchor.setTo(0.5);
+    }
+};
+
+// Variables globales para gestionar los elementos principales del juego.
 var Juego = {
     nave: null, // Referencia a la nave del jugador.
     asteroides: null, // Grupo de asteroides.
