@@ -226,7 +226,7 @@ var Juego = {
         // Verificar si la nave esquiva un asteroide.
         Juego.asteroides.forEachAlive(function (asteroide) {
             // Verifica si el asteroide ha salido por la parte inferior de la pantalla y no ha sido esquivado antes
-            if (asteroide.y > juego.height && !asteroide.esquivado) {
+            if (asteroide.y > juego.height && !asteroide.esquivado) { // Problema de los 36 puntos por 1
                 Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados
                 Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar el asteroide
                 Juego.actualizarTextoNivel(); // Actualizar el texto con el contador de asteroides esquivados
