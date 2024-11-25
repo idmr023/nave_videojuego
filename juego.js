@@ -1,10 +1,9 @@
-// Variables globales para gestionar los elementos principales del juego.
 var nave;
 var asteroides;
 var timer;
-var velocidadAsteroides = 100; // Aumenta o disminuye esta velocidad según el nivel
-var nivel = 1; // El nivel inicial del juego
-var asteroidesEsquivados = 0; // Contador de asteroides esquivados
+var asteroidesEsquivados = 0;
+var nivel = 1;
+var velocidadAsteroides = 100;
 var textoNivel;
 var reconocimientoVoz; 
 var nombreCreador = "Ivan Daniel Manrique Roa";
@@ -95,78 +94,47 @@ var Juego = {
 
     // Lógica principal del juego.
     preload: function () {
-        // Cargar los recursos para el juego.
+        // Cargar los recursos para el juego (nave, asteroides, fondo, etc.).
         juego.load.image('nave', 'img/nave.png');
         juego.load.image('asteroide', 'img/malo.png');
         juego.load.image('enemigo2', 'img/enemigos2.png');
         juego.load.image('bg', 'img/bg.png');
         juego.load.audio('musicaFondo', 'audio/fondo.mp3'); // Música de fondo.
         juego.load.audio('sonidoEsquivar', 'audio/esquivar.mp3'); // Sonido al esquivar asteroides.
-    },    
+    },
 
     create: function () {
         // Crear el fondo del juego y activar el sistema de física.
         juego.add.tileSprite(0, 0, juego.width, juego.height, 'bg');
         juego.physics.startSystem(Phaser.Physics.ARCADE);
-    
+
         // Crear y configurar la nave del jugador.
         Juego.nave = juego.add.sprite(juego.width / 2, juego.height - 100, 'nave');
         Juego.nave.anchor.setTo(0.5); // Establecer el centro de la nave.
         juego.physics.arcade.enable(Juego.nave); // Habilitar la física en la nave.
         Juego.nave.body.collideWorldBounds = true; // Habilitar la colisión con los límites del mundo.
         Juego.nave.body.setSize(50, 50, 0, 0); // Ajustar el tamaño de la nave para la colisión.
-    
+
         // Crear asteroides.
         Juego.crearAsteroides();
         Juego.timer = juego.time.events.loop(2000, Juego.crearAsteroide, Juego); // Crear asteroides cada 2 segundos.
-    
+
         // Mostrar el texto con el nivel y los asteroides esquivados.
         Juego.textoNivel = juego.add.text(10, 10, 'Nivel: 1\nAsteroides Esquivados: 0', {
             font: '20px Arial',
             fill: '#ffffff'
         });
-    
+
         // Iniciar la música de fondo.
         Juego.musicaFondo = juego.add.audio('musicaFondo');
         Juego.musicaFondo.loop = true; // Reproducir música de fondo en bucle.
         Juego.musicaFondo.play();
-        
+
         // Sonido al esquivar un asteroide.
         Juego.sonidoEsquivar = juego.add.audio('sonidoEsquivar');
-    
+
         // Iniciar el reconocimiento de voz.
         Juego.iniciarReconocimientoVoz();
-    },    
-
-    reiniciarJuego: function () {
-        // Restablecer variables globales.
-        Juego.nivel = 1;
-        Juego.asteroidesEsquivados = 0;
-        Juego.velocidadAsteroides = 100;
-        Juego.movimientoEnCurso = 0;
-        Juego.nave.x = juego.width / 2; // Volver a la posición inicial.
-        Juego.nave.y = juego.height - 100;
-    
-        // Restablecer asteroides.
-        Juego.asteroides.callAll('kill'); // Destruir todos los asteroides.
-    
-        // Restablecer texto del nivel y asteroides esquivados.
-        Juego.actualizarTextoNivel();
-    
-        // Reiniciar música y sonidos.
-        Juego.musicaFondo.stop();
-        Juego.musicaFondo.play();
-    
-        // Reiniciar el temporizador para los asteroides.
-        Juego.timer.remove();
-        Juego.timer = juego.time.events.loop(2000, Juego.crearAsteroide, Juego); // Iniciar nuevo ciclo de creación de asteroides.
-    
-        // Reiniciar el reconocimiento de voz.
-        Juego.reconocimientoVoz.stop(); // Detener reconocimiento de voz.
-        Juego.iniciarReconocimientoVoz(); // Reiniciar el reconocimiento de voz.
-    
-        // Iniciar el estado de juego de nuevo.
-        juego.state.start('Juego');
     },
 
     // Función para crear un grupo de asteroides.
@@ -182,63 +150,112 @@ var Juego = {
 
     // Función para crear un asteroide en una posición aleatoria.
     crearAsteroide: function () {
-        var asteroide = Juego.asteroides.getFirstDead(); // Obtener un asteroide muerto (no visible).
-        if (asteroide) {
-            var x = juego.rnd.integerInRange(50, juego.width - 50); // Posición aleatoria en X.
-            var y = -50; // Fuera de la pantalla en la parte superior.
-            asteroide.reset(x, y); // Colocar el asteroide en la pantalla.
-            asteroide.body.velocity.y = Juego.velocidadAsteroides; // Asignar velocidad hacia abajo.
+        var asteroide;
+        if (Juego.nivel >= 2) {
+            // En el nivel 2 y superior, generar enemigos tipo "enemigo2"
+            asteroide = Juego.asteroides.getFirstDead(); // Obtener el primer asteroide muerto para reutilizarlo.
+            asteroide.reset(Math.floor(Math.random() * (juego.width / 38)) * 38, 0); // Restablecer el asteroide en la posición generada.
+            asteroide.loadTexture('enemigo2'); // Cambiar a la textura de enemigo2
+        } else {
+            // En el nivel 1, generar los asteroides tipo "malo.png"
+            asteroide = Juego.asteroides.getFirstDead(); // Obtener el primer asteroide muerto para reutilizarlo.
+            asteroide.reset(Math.floor(Math.random() * (juego.width / 38)) * 38, 0); // Restablecer el asteroide en la posición generada.
+            asteroide.loadTexture('asteroide'); // Cambiar a la textura del asteroide normal
         }
-    },
-
-    // Función para actualizar el texto de nivel y asteroides esquivados.
-    actualizarTextoNivel: function () {
-        Juego.textoNivel.text = 'Nivel: ' + Juego.nivel + '\nAsteroides Esquivados: ' + Juego.asteroidesEsquivados;
-    },
-
-    // Función para gestionar el movimiento de la nave.
-    controlarNave: function (comando) {
-        comando = comando.trim().toLowerCase();
-        switch (comando) {
-            case 'izquierda.':
-                Juego.moverNave(-1); // Mueve la nave a la izquierda.
-                break;
-            case 'derecha.':
-                Juego.moverNave(1); // Mueve la nave a la derecha.
-                break;
-            default:
-                console.log('Comando no reconocido:', comando);
-        }
-    },
-
-    moverNave: function (direccion) {
-        // Ajusta la aceleración y velocidad de la nave según la dirección.
-        const VELOCIDAD_MAXIMA = 200;
-        const ACELERACION = 150;
-
-        Juego.nave.body.acceleration.x = direccion * ACELERACION;
-        Juego.nave.body.velocity.x = Phaser.Math.clamp(Juego.nave.body.velocity.x, -VELOCIDAD_MAXIMA, VELOCIDAD_MAXIMA);
+        asteroide.anchor.setTo(0.5); // Centrar el asteroide.
+        asteroide.body.velocity.y = Juego.velocidadAsteroides; // Asignar velocidad hacia abajo.
     },
 
     // Función para iniciar el reconocimiento de voz.
     iniciarReconocimientoVoz: function () {
-        if ('webkitSpeechRecognition' in window) {
-            Juego.reconocimientoVoz = new webkitSpeechRecognition();
-            Juego.reconocimientoVoz.continuous = true; // Escuchar continuamente.
-            Juego.reconocimientoVoz.interimResults = false; // Solo mostrar resultados finales.
-
-            Juego.reconocimientoVoz.onresult = function (event) {
-                var resultado = event.results[event.resultIndex];
-                if (resultado.isFinal) {
-                    var comando = resultado[0].transcript.trim().toLowerCase();
-                    console.log('Comando reconocido:', comando); // Imprimir el comando reconocido.
-                    Juego.controlarNave(comando);
-                }
-            };
-
-            Juego.reconocimientoVoz.start(); // Iniciar el reconocimiento de voz.
-        } else {
-            alert('El reconocimiento de voz no es compatible con tu navegador.');
+        if (!('webkitSpeechRecognition' in window)) {
+            console.error('El reconocimiento de voz no es compatible con este navegador.');
+            return;
         }
+
+        // Crear una instancia de SpeechRecognition.
+        Juego.reconocimientoVoz = new webkitSpeechRecognition();
+        Juego.reconocimientoVoz.continuous = true; // Continuar escuchando.
+        Juego.reconocimientoVoz.interimResults = false; // No mostrar resultados intermedios.
+        Juego.reconocimientoVoz.lang = 'es-ES'; // Establecer el idioma del reconocimiento a español.
+
+        // Manejar el evento cuando se reconoce la voz.
+        Juego.reconocimientoVoz.onresult = function (event) {
+            var resultado = event.results[event.resultIndex]; // Obtener el resultado del reconocimiento.
+            if (resultado.isFinal) { // Si es un resultado final.
+                var comando = resultado[0].transcript.trim().toLowerCase(); // Obtener el comando como texto.
+                console.log('Comando reconocido:', comando);
+                Juego.controlarNave(comando); // Ejecutar el comando.
+            }
+        };
+
+        // Manejar errores del reconocimiento de voz.
+        Juego.reconocimientoVoz.onerror = function (event) {
+            console.error('Error en el reconocimiento de voz: ', event.error);
+        };
+
+        // Iniciar el reconocimiento de voz.
+        Juego.reconocimientoVoz.start();
+    },
+
+    // Función para controlar el movimiento de la nave según el comando de voz.
+    controlarNave: function (comando) {
+        const movimientos = {
+            'izquierda.': -1, // Comando para mover la nave a la izquierda.
+            'derecha.': 1 // Comando para mover la nave a la derecha.
+        };
+
+        if (movimientos[comando]) {
+            Juego.moverNave(movimientos[comando]); // Mover la nave en la dirección indicada.
+        } else {
+            console.log('Comando no reconocido:', comando); // Si el comando no es reconocido.
+        }
+    },
+
+    // Función para mover la nave.
+    moverNave: function (direccion) {
+        const VELOCIDAD_MAXIMA = 200; // Velocidad máxima de la nave.
+        const ACELERACION = 150; // Aceleración de la nave.
+
+        Juego.nave.body.acceleration.x = direccion * ACELERACION; // Acelerar en la dirección indicada.
+        Juego.nave.body.velocity.x = Phaser.Math.clamp(Juego.nave.body.velocity.x, -VELOCIDAD_MAXIMA, VELOCIDAD_MAXIMA); // Limitar la velocidad.
+    },
+
+    // Función para actualizar el texto del nivel y los asteroides esquivados.
+    actualizarTextoNivel: function () {
+        Juego.textoNivel.setText(Nivel: ${Juego.nivel}\nAsteroides Esquivados: ${Juego.asteroidesEsquivados});
+    },
+
+    // Función de actualización del juego.
+    // Función de actualización del juego.
+// Función de actualización del juego.
+    update: function () {
+        // Comprobar las colisiones entre la nave y los asteroides.
+        juego.physics.arcade.collide(Juego.nave, Juego.asteroides, Juego.perder, null, Juego);
+
+        // Verificar si la nave esquiva un asteroide.
+        Juego.asteroides.forEachAlive(function (asteroide) {
+            // Verifica si el asteroide ha salido por la parte inferior de la pantalla y no ha sido esquivado antes
+            if (asteroide.y > juego.height && !asteroide.esquivado) {
+                Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados
+                Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar el asteroide
+                Juego.actualizarTextoNivel(); // Actualizar el texto con el contador de asteroides esquivados
+
+                // Marcar el asteroide como esquivado para evitar que se cuente varias veces
+                asteroide.esquivado = true; 
+
+                // Cambiar al siguiente nivel después de esquivar 5 asteroides.
+                if (Juego.asteroidesEsquivados > 5) {
+                    Juego.nivel = 2; // Pasar al nivel 2
+                    Juego.velocidadAsteroides = 150; // Aumentar la velocidad de los asteroides
+                    console.log('Nivel 2 alcanzado!');
+                }
+            }
+        });              
+    },
+
+    // Función para perder cuando la nave colisiona con un asteroide.
+    perder: function () {
+        juego.state.start('Menu'); // Volver al menú principal después de perder.
     }
 };
