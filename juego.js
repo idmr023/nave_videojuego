@@ -218,19 +218,20 @@ var Juego = {
     },
 
     // Función de actualización del juego.
+    // Función de actualización del juego.
     update: function () {
         // Comprobar las colisiones entre la nave y los asteroides.
         juego.physics.arcade.collide(Juego.nave, Juego.asteroides, Juego.perder, null, Juego);
 
         // Verificar si la nave esquiva un asteroide.
         Juego.asteroides.forEachAlive(function (asteroide) {
-            // Verifica si el asteroide ha salido por la parte inferior de la pantalla
+            // Verifica si el asteroide ha salido por la parte inferior de la pantalla y no ha sido esquivado antes
             if (asteroide.y > juego.height && !asteroide.esquivado) {
                 Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados
                 Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar el asteroide
                 Juego.actualizarTextoNivel(); // Actualizar el texto con el contador de asteroides esquivados
-        
-                // Marcar el asteroide como esquivado para evitar contarlo varias veces
+
+                // Marcar el asteroide como esquivado para evitar que se cuente varias veces
                 asteroide.esquivado = true; 
             }
         });              
