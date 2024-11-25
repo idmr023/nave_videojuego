@@ -224,12 +224,16 @@ var Juego = {
 
         // Verificar si la nave esquiva un asteroide.
         Juego.asteroides.forEachAlive(function (asteroide) {
-            if (asteroide.y > juego.height) {
-                Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados.
-                Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar.
-                Juego.actualizarTextoNivel(); // Actualizar el texto con los nuevos valores.
+            // Verifica si el asteroide ha salido por la parte inferior de la pantalla
+            if (asteroide.y > juego.height && !asteroide.esquivado) {
+                Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados
+                Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar el asteroide
+                Juego.actualizarTextoNivel(); // Actualizar el texto con el contador de asteroides esquivados
+        
+                // Marcar el asteroide como esquivado para evitar contarlo varias veces
+                asteroide.esquivado = true; 
             }
-        });
+        });              
     },
 
     // Función para perder cuando la nave colisiona con un asteroide.
