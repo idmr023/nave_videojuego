@@ -150,9 +150,18 @@ var Juego = {
 
     // Función para crear un asteroide en una posición aleatoria.
     crearAsteroide: function () {
-        var asteroide = Juego.asteroides.getFirstDead(); // Obtener el primer asteroide muerto para reutilizarlo.
-        var num = Math.floor(Math.random() * (juego.width / 38)); // Generar una posición aleatoria.
-        asteroide.reset(num * 38, 0); // Restablecer el asteroide en la posición generada.
+        var asteroide;
+        if (Juego.nivel >= 2) {
+            // En el nivel 2 y superior, generar enemigos tipo "enemigo2"
+            asteroide = Juego.asteroides.getFirstDead(); // Obtener el primer asteroide muerto para reutilizarlo.
+            asteroide.reset(Math.floor(Math.random() * (juego.width / 38)) * 38, 0); // Restablecer el asteroide en la posición generada.
+            asteroide.loadTexture('enemigo2'); // Cambiar a la textura de enemigo2
+        } else {
+            // En el nivel 1, generar los asteroides tipo "malo.png"
+            asteroide = Juego.asteroides.getFirstDead(); // Obtener el primer asteroide muerto para reutilizarlo.
+            asteroide.reset(Math.floor(Math.random() * (juego.width / 38)) * 38, 0); // Restablecer el asteroide en la posición generada.
+            asteroide.loadTexture('asteroide'); // Cambiar a la textura del asteroide normal
+        }
         asteroide.anchor.setTo(0.5); // Centrar el asteroide.
         asteroide.body.velocity.y = Juego.velocidadAsteroides; // Asignar velocidad hacia abajo.
     },
@@ -219,29 +228,30 @@ var Juego = {
 
     // Función de actualización del juego.
     // Función de actualización del juego.
+// Función de actualización del juego.
     update: function () {
         // Comprobar las colisiones entre la nave y los asteroides.
         juego.physics.arcade.collide(Juego.nave, Juego.asteroides, Juego.perder, null, Juego);
-    
+
         // Verificar si la nave esquiva un asteroide.
         Juego.asteroides.forEachAlive(function (asteroide) {
             // Verifica si el asteroide ha salido por la parte inferior de la pantalla y no ha sido esquivado antes
-            if (asteroide.y > juego.height && !asteroide.esquivado) { // Problema de los 36 puntos por 1
+            if (asteroide.y > juego.height && !asteroide.esquivado) {
                 Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados
                 Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar el asteroide
                 Juego.actualizarTextoNivel(); // Actualizar el texto con el contador de asteroides esquivados
-    
+
                 // Marcar el asteroide como esquivado para evitar que se cuente varias veces
                 asteroide.esquivado = true; 
+
+                // Cambiar al siguiente nivel después de esquivar 5 asteroides.
+                if (Juego.asteroidesEsquivados > 5) {
+                    Juego.nivel = 2; // Pasar al nivel 2
+                    Juego.velocidadAsteroides = 150; // Aumentar la velocidad de los asteroides
+                    console.log('Nivel 2 alcanzado!');
+                }
             }
-        });
-    
-        // Incrementar el nivel y aumentar la velocidad después de esquivar 5 asteroides.
-        if (Juego.asteroidesEsquivados >= 5 && Juego.nivel === 1) {
-            Juego.nivel = 2; // Aumentar el nivel
-            Juego.velocidadAsteroides += 50; // Aumentar la velocidad de los asteroides
-            Juego.textoNivel.setText(`Nivel: ${Juego.nivel}\nAsteroides Esquivados: ${Juego.asteroidesEsquivados}`); // Actualizar el texto
-        }
+        });              
     },
 
     // Función para perder cuando la nave colisiona con un asteroide.
