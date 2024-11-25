@@ -234,8 +234,8 @@ var Juego = {
     // Función para controlar el movimiento de la nave según el comando de voz.
     controlarNave: function (comando) {
         const movimientos = {
-            'izquierda': function () { Juego.nave.x -= 10; }, // Mover a la izquierda.
-            'derecha': function () { Juego.nave.x += 10; }, // Mover a la derecha.
+            'izquierda.': function () { Juego.nave.x -= 10; }, // Mover a la izquierda.
+            'derecha.': function () { Juego.nave.x += 10; }, // Mover a la derecha.
         };
         
         if (movimientos[comando]) {
@@ -284,7 +284,7 @@ var Juego = {
                     console.log('Nivel 2 alcanzado!');
                 }
             }
-        });              
+        });
     },
 
 
