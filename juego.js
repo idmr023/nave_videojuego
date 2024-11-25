@@ -89,7 +89,7 @@ var Juego = {
         this.sonidoEsquivar = juego.add.audio('sonidoEsquivar');
 
         // Inicia el reconocimiento de voz.
-        this.iniciarReconocimientoVoz();
+        Juego.iniciarReconocimientoVoz();
     },
 
     crearAsteroides: function () {
