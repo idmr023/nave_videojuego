@@ -60,7 +60,7 @@ var Juego = {
         juego.load.image('nave', 'img/nave.png');
         juego.load.image('asteroide', 'img/malo.png');
         juego.load.image('bg', 'img/bg.png');
-        juego.load.image('enemigo2', 'img/enemigo2.png'); // Asegúrate de cargar la imagen enemigo2.
+        juego.load.image('enemigo2', 'img/enemigos2.png'); // Asegúrate de cargar la imagen enemigo2.
         juego.load.audio('musicaFondo', 'audio/fondo.mp3');
         juego.load.audio('sonidoEsquivar', 'audio/esquivar.mp3');
     },
