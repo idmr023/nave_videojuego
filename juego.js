@@ -58,41 +58,6 @@ var Juego = {
     movimientoEnCurso: 0, // Control de si el movimiento está en curso.
     nombreCreador: "Ivan Daniel Manrique Roa", // Nombre del creador del juego.
 
-    // Menú principal del juego.
-    Menu: {
-        preload: function () {
-            // Cargar imágenes para el menú.
-            juego.load.image('fondo', 'img/bg.png');
-            juego.load.image('boton', 'img/boton.png');
-        },
-
-        create: function () {
-            // Crear el fondo de la pantalla.
-            var fondo = juego.add.sprite(0, 0, 'fondo');
-            fondo.width = juego.width; // Ajustar el fondo al tamaño de la pantalla.
-            fondo.height = juego.height;
-
-            // Título del juego centrado.
-            var titulo = juego.add.text(juego.width / 2, juego.height / 3, 'Juego de Asteroides', {
-                font: '40px Arial',
-                fill: '#ffffff'
-            });
-            titulo.anchor.setTo(0.5);
-
-            // Botón para iniciar el juego.
-            var botonIniciar = juego.add.button(juego.width / 2, juego.height / 1.5, 'boton', function () {
-                juego.state.start('Juego'); // Cambiar al estado de "Juego" cuando se presiona el botón.
-            });
-            botonIniciar.anchor.setTo(0.5);
-
-            // Texto con el nombre del creador.
-            juego.add.text(juego.width / 2, juego.height / 2.6, 'Creador: ' + Juego.nombreCreador, {
-                font: '20px Arial',
-                fill: '#ffffff'
-            }).anchor.setTo(0.5);
-        }
-    },
-
     // Lógica principal del juego.
     preload: function () {
         // Cargar los recursos para el juego (nave, asteroides, fondo, etc.).
@@ -202,61 +167,36 @@ var Juego = {
     // Función para controlar el movimiento de la nave según el comando de voz.
     controlarNave: function (comando) {
         const movimientos = {
-            'izquierda.': -1, // Comando para mover la nave a la izquierda.
-            'derecha.': 1 // Comando para mover la nave a la derecha.
+            'izquierda': function () { Juego.nave.x -= 10; }, // Mover a la izquierda.
+            'derecha': function () { Juego.nave.x += 10; }, // Mover a la derecha.
         };
 
-        if (movimientos[comando]) {
-            Juego.moverNave(movimientos[comando]); // Mover la nave en la dirección indicada.
-        } else {
-            console.log('Comando no reconocido:', comando); // Si el comando no es reconocido.
+        // Si el comando está en los movimientos, ejecutar la acción correspondiente.
+        if (comandos[comando]) {
+            movimientos[comando]();
         }
     },
 
-    // Función para mover la nave.
-    moverNave: function (direccion) {
-        const VELOCIDAD_MAXIMA = 200; // Velocidad máxima de la nave.
-        const ACELERACION = 150; // Aceleración de la nave.
-
-        Juego.nave.body.acceleration.x = direccion * ACELERACION; // Acelerar en la dirección indicada.
-        Juego.nave.body.velocity.x = Phaser.Math.clamp(Juego.nave.body.velocity.x, -VELOCIDAD_MAXIMA, VELOCIDAD_MAXIMA); // Limitar la velocidad.
-    },
-
-    // Función para actualizar el texto del nivel y los asteroides esquivados.
-    actualizarTextoNivel: function () {
-        Juego.textoNivel.setText(`Nivel: ${Juego.nivel}\nAsteroides Esquivados: ${Juego.asteroidesEsquivados}`);
-    },
-
-    // Función de actualización del juego.
-    // Función de actualización del juego.
-// Función de actualización del juego.
+    // Actualizar el estado del juego.
     update: function () {
-        // Comprobar las colisiones entre la nave y los asteroides.
-        juego.physics.arcade.collide(Juego.nave, Juego.asteroides, Juego.perder, null, Juego);
+        // Comprobar colisiones entre la nave y los asteroides.
+        juego.physics.arcade.overlap(Juego.nave, Juego.asteroides, Juego.colisionAsteroide, null, this);
 
-        // Verificar si la nave esquiva un asteroide.
+        // Comprobar si un asteroide ha llegado al fondo.
         Juego.asteroides.forEachAlive(function (asteroide) {
-            // Verifica si el asteroide ha salido por la parte inferior de la pantalla y no ha sido esquivado antes
-            if (asteroide.y > juego.height && !asteroide.esquivado) {
-                Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados
-                Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar el asteroide
-                Juego.actualizarTextoNivel(); // Actualizar el texto con el contador de asteroides esquivados
-
-                // Marcar el asteroide como esquivado para evitar que se cuente varias veces
-                asteroide.esquivado = true; 
-
-                // Cambiar al siguiente nivel después de esquivar 5 asteroides.
-                if (Juego.asteroidesEsquivados > 5) {
-                    Juego.nivel = 2; // Pasar al nivel 2
-                    Juego.velocidadAsteroides = 150; // Aumentar la velocidad de los asteroides
-                    console.log('Nivel 2 alcanzado!');
-                }
+            if (asteroide.y > juego.height) {
+                Juego.asteroidesEsquivados++;
+                Juego.sonidoEsquivar.play();
             }
-        });              
+        });
+
+        // Actualizar el texto de nivel y asteroides esquivados.
+        Juego.textoNivel.text = 'Nivel: ' + Juego.nivel + '\nAsteroides Esquivados: ' + Juego.asteroidesEsquivados;
     },
 
-    // Función para perder cuando la nave colisiona con un asteroide.
-    perder: function () {
-        juego.state.start('Menu'); // Volver al menú principal después de perder.
+    // Función para manejar la colisión entre la nave y los asteroides.
+    colisionAsteroide: function (nave, asteroide) {
+        // Fin del juego si la nave toca un asteroide.
+        juego.state.start('Menu');
     }
 };
