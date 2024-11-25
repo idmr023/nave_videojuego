@@ -98,6 +98,7 @@ var Juego = {
         // Cargar los recursos para el juego (nave, asteroides, fondo, etc.).
         juego.load.image('nave', 'img/nave.png');
         juego.load.image('asteroide', 'img/malo.png');
+        juego.load.image('enemigo2', 'img/enemigos2.png');
         juego.load.image('bg', 'img/bg.png');
         juego.load.audio('musicaFondo', 'audio/fondo.mp3'); // Música de fondo.
         juego.load.audio('sonidoEsquivar', 'audio/esquivar.mp3'); // Sonido al esquivar asteroides.
