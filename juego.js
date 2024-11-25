@@ -168,131 +168,77 @@ var Juego = {
         // Iniciar el estado de juego de nuevo.
         juego.state.start('Juego');
     },
-    
 
-        // Función para crear un grupo de asteroides.
-        crearAsteroides: function () {
-            Juego.asteroides = juego.add.group();
-            Juego.asteroides.enableBody = true; // Habilitar la física para los asteroides.
-            Juego.asteroides.createMultiple(50, 'asteroide'); // Crear 50 asteroides.
-            Juego.asteroides.setAll('anchor.x', 0.5); // Centrar los asteroides.
-            Juego.asteroides.setAll('anchor.y', 0.5);
-            Juego.asteroides.setAll('checkWorldBounds', true); // Comprobar si los asteroides se salen del mundo.
-            Juego.asteroides.setAll('outOfBoundsKill', true); // Destruir los asteroides que se salen del mundo.
-        },
-
-        // Función para crear un asteroide en una posición aleatoria.
-        crearAsteroide: function () {
-            var asteroide;
-            if (Juego.nivel >= 2) {
-                // En el nivel 2 y superior, generar enemigos tipo "enemigo2"
-                asteroide = Juego.asteroides.getFirstDead(); // Obtener el primer asteroide muerto para reutilizarlo.
-                asteroide.reset(Math.floor(Math.random() * (juego.width / 38)) * 38, 0); // Restablecer el asteroide en la posición generada.
-                asteroide.loadTexture('enemigo2'); // Cambiar a la textura de enemigo2
-            } else {
-                // En el nivel 1, generar los asteroides tipo "malo.png"
-                asteroide = Juego.asteroides.getFirstDead(); // Obtener el primer asteroide muerto para reutilizarlo.
-                asteroide.reset(Math.floor(Math.random() * (juego.width / 38)) * 38, 0); // Restablecer el asteroide en la posición generada.
-                asteroide.loadTexture('asteroide'); // Cambiar a la textura del asteroide normal
-            }
-            asteroide.anchor.setTo(0.5); // Centrar el asteroide.
-            asteroide.body.velocity.y = Juego.velocidadAsteroides; // Asignar velocidad hacia abajo.
-        },
-
-        // Función para iniciar el reconocimiento de voz.
-        iniciarReconocimientoVoz: function () {
-            if (!('webkitSpeechRecognition' in window)) {
-                console.error('El reconocimiento de voz no es compatible con este navegador.');
-                return;
-            }
-
-            // Crear una instancia de SpeechRecognition.
-            Juego.reconocimientoVoz = new webkitSpeechRecognition();
-            Juego.reconocimientoVoz.continuous = true; // Continuar escuchando.
-            Juego.reconocimientoVoz.interimResults = false; // No mostrar resultados intermedios.
-            Juego.reconocimientoVoz.lang = 'es-ES'; // Establecer el idioma del reconocimiento a español.
-
-            // Manejar el evento cuando se reconoce la voz.
-            Juego.reconocimientoVoz.onresult = function (event) {
-                var resultado = event.results[event.resultIndex]; // Obtener el resultado del reconocimiento.
-                if (resultado.isFinal) { // Si es un resultado final.
-                    var comando = resultado[0].transcript.trim().toLowerCase(); // Obtener el comando como texto.
-                    console.log('Comando reconocido:', comando);
-                    Juego.controlarNave(comando); // Ejecutar el comando.
-                }
-            };        
-
-        // Manejar errores del reconocimiento de voz.
-        Juego.reconocimientoVoz.onerror = function (event) {
-            console.error('Error en el reconocimiento de voz: ', event.error);
-        };
-
-        // Iniciar el reconocimiento de voz.
-        Juego.reconocimientoVoz.start();
+    // Función para crear un grupo de asteroides.
+    crearAsteroides: function () {
+        Juego.asteroides = juego.add.group();
+        Juego.asteroides.enableBody = true; // Habilitar la física para los asteroides.
+        Juego.asteroides.createMultiple(50, 'asteroide'); // Crear 50 asteroides.
+        Juego.asteroides.setAll('anchor.x', 0.5); // Centrar los asteroides.
+        Juego.asteroides.setAll('anchor.y', 0.5);
+        Juego.asteroides.setAll('checkWorldBounds', true); // Comprobar si los asteroides se salen del mundo.
+        Juego.asteroides.setAll('outOfBoundsKill', true); // Destruir los asteroides que se salen del mundo.
     },
 
-    // Función para controlar el movimiento de la nave según el comando de voz.
-    controlarNave: function (comando) {
-        const movimientos = {
-            'izquierda.': function () { Juego.nave.x -= 10; }, // Mover a la izquierda.
-            'derecha.': function () { Juego.nave.x += 10; }, // Mover a la derecha.
-        };
-        
-        if (movimientos[comando]) {
-            Juego.moverNave(movimientos[comando]); // Mover la nave en la dirección indicada.
-        } else {
-            console.log('Comando no reconocido:', comando); // Si el comando no es reconocido.
+    // Función para crear un asteroide en una posición aleatoria.
+    crearAsteroide: function () {
+        var asteroide = Juego.asteroides.getFirstDead(); // Obtener un asteroide muerto (no visible).
+        if (asteroide) {
+            var x = juego.rnd.integerInRange(50, juego.width - 50); // Posición aleatoria en X.
+            var y = -50; // Fuera de la pantalla en la parte superior.
+            asteroide.reset(x, y); // Colocar el asteroide en la pantalla.
+            asteroide.body.velocity.y = Juego.velocidadAsteroides; // Asignar velocidad hacia abajo.
         }
     },
 
-    // Función para mover la nave.
-    moverNave: function (direccion) {
-        const VELOCIDAD_MAXIMA = 200; // Velocidad máxima de la nave.
-        const ACELERACION = 150; // Aceleración de la nave.
-
-        Juego.nave.body.acceleration.x = direccion * ACELERACION; // Acelerar en la dirección indicada.
-        Juego.nave.body.velocity.x = Phaser.Math.clamp(Juego.nave.body.velocity.x, -VELOCIDAD_MAXIMA, VELOCIDAD_MAXIMA); // Limitar la velocidad.
-    },
-
-    // Función para actualizar el texto del nivel y los asteroides esquivados.
+    // Función para actualizar el texto de nivel y asteroides esquivados.
     actualizarTextoNivel: function () {
-        Juego.textoNivel.setText(`Nivel: ${Juego.nivel}\nAsteroides Esquivados: ${Juego.asteroidesEsquivados}`);
+        Juego.textoNivel.text = 'Nivel: ' + Juego.nivel + '\nAsteroides Esquivados: ' + Juego.asteroidesEsquivados;
     },
 
-    // Función de actualización del juego.
-    // Función de actualización del juego.
-// Función de actualización del juego.
-    update: function () {
-        // Comprobar las colisiones entre la nave y los asteroides.
-        juego.physics.arcade.collide(Juego.nave, Juego.asteroides, Juego.perder, null, Juego);
+    // Función para gestionar el movimiento de la nave.
+    controlarNave: function (comando) {
+        comando = comando.trim().toLowerCase();
+        switch (comando) {
+            case 'izquierda.':
+                Juego.moverNave(-1); // Mueve la nave a la izquierda.
+                break;
+            case 'derecha.':
+                Juego.moverNave(1); // Mueve la nave a la derecha.
+                break;
+            default:
+                console.log('Comando no reconocido:', comando);
+        }
+    },
 
-        // Verificar si la nave esquiva un asteroide.
-        Juego.asteroides.forEachAlive(function (asteroide) {
-            // Verifica si el asteroide ha salido por la parte inferior de la pantalla y no ha sido esquivado antes
-            if (asteroide.y > juego.height && !asteroide.esquivado) {
-                Juego.asteroidesEsquivados++; // Incrementar contador de asteroides esquivados
-                Juego.sonidoEsquivar.play(); // Reproducir sonido al esquivar el asteroide
-                Juego.actualizarTextoNivel(); // Actualizar el texto con el contador de asteroides esquivados
+    moverNave: function (direccion) {
+        // Ajusta la aceleración y velocidad de la nave según la dirección.
+        const VELOCIDAD_MAXIMA = 200;
+        const ACELERACION = 150;
 
-                // Marcar el asteroide como esquivado para evitar que se cuente varias veces
-                asteroide.esquivado = true; 
+        Juego.nave.body.acceleration.x = direccion * ACELERACION;
+        Juego.nave.body.velocity.x = Phaser.Math.clamp(Juego.nave.body.velocity.x, -VELOCIDAD_MAXIMA, VELOCIDAD_MAXIMA);
+    },
 
-                // Cambiar al siguiente nivel después de esquivar 5 asteroides.
-                if (Juego.asteroidesEsquivados > 5) {
-                    Juego.nivel = 2; // Pasar al nivel 2
-                    Juego.velocidadAsteroides = 150; // Aumentar la velocidad de los asteroides
-                    console.log('Nivel 2 alcanzado!');
+    // Función para iniciar el reconocimiento de voz.
+    iniciarReconocimientoVoz: function () {
+        if ('webkitSpeechRecognition' in window) {
+            Juego.reconocimientoVoz = new webkitSpeechRecognition();
+            Juego.reconocimientoVoz.continuous = true; // Escuchar continuamente.
+            Juego.reconocimientoVoz.interimResults = false; // Solo mostrar resultados finales.
+
+            Juego.reconocimientoVoz.onresult = function (event) {
+                var resultado = event.results[event.resultIndex];
+                if (resultado.isFinal) {
+                    var comando = resultado[0].transcript.trim().toLowerCase();
+                    console.log('Comando reconocido:', comando); // Imprimir el comando reconocido.
+                    Juego.controlarNave(comando);
                 }
-            }
-        });
-    },
+            };
 
-
-    // Función para perder cuando la nave colisiona con un asteroide.
-    perder: function () {
-        reiniciarJuego();
-    },
-
-
-    
+            Juego.reconocimientoVoz.start(); // Iniciar el reconocimiento de voz.
+        } else {
+            alert('El reconocimiento de voz no es compatible con tu navegador.');
+        }
+    }
 };
