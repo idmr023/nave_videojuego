@@ -110,6 +110,29 @@ var Juego = {
         asteroide.body.velocity.y = velocidadAsteroides;
     },
 
+    iniciarReconocimientoVoz: function () {
+        // Configuración básica del reconocimiento de voz.
+        reconocimientoVoz = new webkitSpeechRecognition();
+        reconocimientoVoz.continuous = true;
+        reconocimientoVoz.interimResults = false;
+        reconocimientoVoz.lang = 'es-ES';
+    
+        reconocimientoVoz.onresult = function (event) {
+            var resultado = event.results[event.resultIndex];
+            if (resultado.isFinal) {
+                var comando = resultado[0].transcript.trim().toLowerCase();
+                console.log('Comando reconocido:', comando);
+                Juego.controlarNave(comando); // Llama a la función de control.
+            }
+        };
+    
+        reconocimientoVoz.onerror = function (event) {
+            console.error('Error en el reconocimiento de voz:', event.error);
+        };
+    
+        reconocimientoVoz.start(); // Inicia el reconocimiento de voz.
+    },    
+
     update: function () {
         juego.physics.arcade.overlap(nave, asteroides, this.gameOver, null, this);
 
