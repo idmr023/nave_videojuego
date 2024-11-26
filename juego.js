@@ -24,7 +24,7 @@ var Menu = {
         fondo.height = juego.height;
 
         // Añade el título del juego centrado en la pantalla.
-        var titulo = juego.add.text(juego.width / 2, juego.height / 3, 'Juego de Asteroides', {
+        var titulo = juego.add.text(juego.width / 2, juego.height / 3, 'Asteroids', {
             font: '40px Arial',
             fill: '#ffffff'
         });
